@@ -7,7 +7,7 @@ Convert [Gemma 4](https://huggingface.co/google/gemma-4-E2B-it) models to [MNN](
 ### 1. Clone
 
 ```bash
-git clone --recurse-submodules https://github.com/tiggychan/llm-on-device.git
+git clone --recurse-submodules https://github.com/Tiggy-Chan/llm-on-device.git
 cd llm-on-device
 ```
 
@@ -57,14 +57,14 @@ echo "Hello, who are you?" > prompt.txt
 
 | Quantization | Size | Download |
 |-------------|------|----------|
-| **INT4 HQQ** | 3.5 GB | [tiggychan/gemma-4-E2B-it-uncensored-mnn-int4](https://huggingface.co/tiggychan/gemma-4-E2B-it-uncensored-mnn-int4) |
-| **INT8** | 5.7 GB | [tiggychan/gemma-4-E2B-it-uncensored-mnn-int8](https://huggingface.co/tiggychan/gemma-4-E2B-it-uncensored-mnn-int8) |
-| **BF16** | 9.5 GB | [tiggychan/gemma-4-E2B-it-uncensored-mnn-bf16](https://huggingface.co/tiggychan/gemma-4-E2B-it-uncensored-mnn-bf16) |
+| **INT4 HQQ** | 3.5 GB | [Tiggy-Chan/gemma-4-E2B-it-uncensored-mnn-int4](https://huggingface.co/Tiggy-Chan/gemma-4-E2B-it-uncensored-mnn-int4) |
+| **INT8** | 5.7 GB | [Tiggy-Chan/gemma-4-E2B-it-uncensored-mnn-int8](https://huggingface.co/Tiggy-Chan/gemma-4-E2B-it-uncensored-mnn-int8) |
+| **BF16** | 9.5 GB | [Tiggy-Chan/gemma-4-E2B-it-uncensored-mnn-bf16](https://huggingface.co/Tiggy-Chan/gemma-4-E2B-it-uncensored-mnn-bf16) |
 
 Download with:
 
 ```bash
-hf download tiggychan/gemma-4-E2B-it-uncensored-mnn-int4 --local-dir ./output/gemma-4-E2B-it-uncensored-mnn-int4
+hf download Tiggy-Chan/gemma-4-E2B-it-uncensored-mnn-int4 --local-dir ./output/gemma-4-E2B-it-uncensored-mnn-int4
 ```
 
 ## Android APK
