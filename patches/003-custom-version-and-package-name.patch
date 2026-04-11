@@ -1,0 +1,27 @@
+diff --git a/apps/Android/MnnLlmChat/app/build.gradle b/apps/Android/MnnLlmChat/app/build.gradle
+index f0c20c4..1f7887e 100644
+--- a/apps/Android/MnnLlmChat/app/build.gradle
++++ b/apps/Android/MnnLlmChat/app/build.gradle
+@@ -66,11 +66,11 @@ android {
+         noCompress += ['weight', 'part1', 'part2', 'part3', 'part4', 'part5', 'part6', 'part7', 'part8', 'part9', 'part10', 'mnn', 'bin', 'jar', 'mdl', 'msc', 'mv', 'txt', 'json', 'md']
+     }
+     defaultConfig {
+-        applicationId "com.alibaba.mnnllm.android"
++        applicationId "com.tiggychan.mnnllm.android"
+         minSdk 26
+         targetSdk 35
+-        versionCode 822
+-        versionName "0.8.2.2"
++        versionCode 8221
++        versionName "0.8.2.2-tiggy"
+         buildConfigField "boolean", "ENABLE_FIREBASE", enableFirebase ? "true" : "false"
+         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+         externalNativeBuild {
+@@ -124,6 +124,7 @@ android {
+                     signingConfig signingConfigs.release
+                 }
+                 applicationIdSuffix ".release"
++                versionNameSuffix ".gemma4"
+             }
+         }
+     }
