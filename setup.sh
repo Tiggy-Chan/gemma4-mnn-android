@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 MNN_DIR="${SCRIPT_DIR}/MNN"
 
 echo "========================================"
-echo "Setting up gemma2mnn"
+echo "Setting up llm-on-device"
 echo "========================================"
 
 # Check MNN exists
