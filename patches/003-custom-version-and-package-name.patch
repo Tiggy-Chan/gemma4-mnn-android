@@ -25,3 +25,20 @@ index f0c20c4..1f7887e 100644
              }
          }
      }
+diff --git a/apps/Android/MnnLlmChat/app/src/main/java/com/alibaba/mnnllm/android/update/UpdateChecker.kt b/apps/Android/MnnLlmChat/app/src/main/java/com/alibaba/mnnllm/android/update/UpdateChecker.kt
+index 76c2c75..4155d33 100644
+--- a/apps/Android/MnnLlmChat/app/src/main/java/com/alibaba/mnnllm/android/update/UpdateChecker.kt
++++ b/apps/Android/MnnLlmChat/app/src/main/java/com/alibaba/mnnllm/android/update/UpdateChecker.kt
+@@ -203,8 +203,10 @@ class UpdateChecker(private val context: Context) {
+         val length =
+             max(latestParts.size.toDouble(), currentParts.size.toDouble()).toInt()
+         for (i in 0 until length) {
+-            val latestNum = if (i < latestParts.size) latestParts[i].toInt() else 0
+-            val currentNum = if (i < currentParts.size) currentParts[i].toInt() else 0
++            val latestVal = if (i < latestParts.size) latestParts[i] else "0"
++            val currentVal = if (i < currentParts.size) currentParts[i] else "0"
++            val latestNum = latestVal.filter { it.isDigit() }.toIntOrNull() ?: 0
++            val currentNum = currentVal.filter { it.isDigit() }.toIntOrNull() ?: 0
+             if (latestNum > currentNum) {
+                 return true
+             } else if (latestNum < currentNum)
