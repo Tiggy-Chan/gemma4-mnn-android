@@ -1,0 +1,70 @@
+diff --git a/transformers/llm/export/utils/model.py b/transformers/llm/export/utils/model.py
+index 6147e5c..2d2748c 100644
+--- a/transformers/llm/export/utils/model.py
++++ b/transformers/llm/export/utils/model.py
+@@ -120,6 +120,65 @@ class LlmModel(PreTrainedModel):
+             original_model = adapter.merge_and_unload(progressbar=True)
+ 
+         original_model = original_model.eval()
++
++        # Patch: Gemma4 shared-KV layers (15+) don't have k_proj/v_proj in HF model.
++        # But the safetensors contain separate weights for each layer's k_proj/v_proj.
++        # Load them from the state_dict so each layer has its own projections for ONNX export.
++        if model_type == 'gemma4':
++            # Navigate to language_model - could be at different paths depending on model class
++            _lm = None
++            if hasattr(original_model, 'language_model'):
++                _lm = original_model.language_model
++            elif hasattr(original_model, 'model') and hasattr(original_model.model, 'language_model'):
++                _lm = original_model.model.language_model
++            elif hasattr(original_model, 'text_model'):
++                _lm = original_model.text_model
++
++            if _lm is not None and hasattr(_lm, 'layers'):
++                # Get safetensors state dict
++                import glob as _glob
++                _model_path = pretrained_model_name_or_path
++                _state = {}
++                for _f in sorted(_glob.glob(f"{_model_path}/*.safetensors")):
++                    from safetensors.torch import load_file as _load_file
++                    _state.update(_load_file(_f, device='cpu'))
++
++                layers = _lm.layers
++                for i, layer in enumerate(layers):
++                    attn = layer.self_attn
++                    if getattr(attn, 'is_kv_shared_layer', False):
++                        prefix = f"model.language_model.layers.{i}.self_attn"
++                        # Create k_proj if missing
++                        if not hasattr(attn, 'k_proj') or attn.k_proj is None:
++                            k_weight = _state.get(f"{prefix}.k_proj.weight")
++                            if k_weight is not None:
++                                in_f = k_weight.shape[1]
++                                out_f = k_weight.shape[0]
++                                attn.k_proj = torch.nn.Linear(in_f, out_f, bias=False)
++                                attn.k_proj.weight = torch.nn.Parameter(k_weight.float())
++                        # Create k_norm if missing
++                        if not hasattr(attn, 'k_norm') or attn.k_norm is None:
++                            k_norm_w = _state.get(f"{prefix}.k_norm.weight")
++                            if k_norm_w is not None:
++                                from transformers.models.gemma4.modeling_gemma4 import Gemma4RMSNorm
++                                attn.k_norm = Gemma4RMSNorm(k_norm_w.shape[0], eps=1e-06)
++                                attn.k_norm.weight = torch.nn.Parameter(k_norm_w.float())
++                        # Create v_proj if missing
++                        if not hasattr(attn, 'v_proj') or attn.v_proj is None:
++                            v_weight = _state.get(f"{prefix}.v_proj.weight")
++                            if v_weight is not None:
++                                in_f = v_weight.shape[1]
++                                out_f = v_weight.shape[0]
++                                attn.v_proj = torch.nn.Linear(in_f, out_f, bias=False)
++                                attn.v_proj.weight = torch.nn.Parameter(v_weight.float())
++                        # Create v_norm if missing
++                        if not hasattr(attn, 'v_norm') or attn.v_norm is None:
++                            v_norm_w = _state.get(f"{prefix}.v_norm.weight")
++                            if v_norm_w is not None:
++                                from transformers.models.gemma4.modeling_gemma4 import Gemma4RMSNorm
++                                attn.v_norm = Gemma4RMSNorm(v_norm_w.shape[0], eps=1e-06)
++                                attn.v_norm.weight = torch.nn.Parameter(v_norm_w.float())
++
+         model = cls(config, args)
+ 
+         ModelMapper.do_map(model, original_model, config.model_map['model'])
