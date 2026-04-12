@@ -1,0 +1,24 @@
+diff --git a/apps/Android/MnnLlmChat/app/src/main/java/com/alibaba/mnnllm/android/chat/input/ChatInputComponent.kt b/apps/Android/MnnLlmChat/app/src/main/java/com/alibaba/mnnllm/android/chat/input/ChatInputComponent.kt
+index cd129b8..989b324 100644
+--- a/apps/Android/MnnLlmChat/app/src/main/java/com/alibaba/mnnllm/android/chat/input/ChatInputComponent.kt
++++ b/apps/Android/MnnLlmChat/app/src/main/java/com/alibaba/mnnllm/android/chat/input/ChatInputComponent.kt
+@@ -138,7 +138,8 @@ class ChatInputComponent(
+     
+     private fun setupThinkingMode() {
+         val extraTags = ModelListManager.getExtraTags(currentModelId)
+-        if (!ModelTypeUtils.isSupportThinkingSwitchByTags(extraTags)) {
++        val isGemma4 = currentModelId.contains("gemma-4", ignoreCase = true) || currentModelId.contains("gemma4", ignoreCase = true)
++        if (!ModelTypeUtils.isSupportThinkingSwitchByTags(extraTags) && !isGemma4) {
+             binding.btnToggleThinking.visibility = View.GONE
+         } else {
+             binding.btnToggleThinking.visibility = View.VISIBLE
+@@ -320,7 +321,8 @@ class ChatInputComponent(
+ 
+             override fun onLeaveRecordingMode() {
+                 val extraTags = ModelListManager.getExtraTags(currentModelId)
+-                if (ModelTypeUtils.isSupportThinkingSwitchByTags(extraTags)) {
++                val isGemma4 = currentModelId.contains("gemma-4", ignoreCase = true) || currentModelId.contains("gemma4", ignoreCase = true)
++                if (ModelTypeUtils.isSupportThinkingSwitchByTags(extraTags) || isGemma4) {
+                     binding.btnToggleThinking.visibility = View.VISIBLE
+                 }
+                 updateAudioOutput()

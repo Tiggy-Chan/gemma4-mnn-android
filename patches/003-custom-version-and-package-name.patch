@@ -41,4 +41,4 @@ index 76c2c75..4155d33 100644
 +            val currentNum = currentVal.filter { it.isDigit() }.toIntOrNull() ?: 0
              if (latestNum > currentNum) {
                  return true
-             } else if (latestNum < currentNum)
+             } else if (latestNum < currentNum) {
