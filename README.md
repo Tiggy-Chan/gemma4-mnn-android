@@ -7,8 +7,8 @@ Convert [Gemma 4](https://huggingface.co/google/gemma-4-E2B-it) models to [MNN](
 ### 1. Clone
 
 ```bash
-git clone --recurse-submodules https://github.com/Tiggy-Chan/llm-on-device.git
-cd llm-on-device
+git clone --recurse-submodules https://github.com/Tiggy-Chan/gemma4-mnn-android.git
+cd gemma4-mnn-android
 ```
 
 Or if you already cloned without submodules:
