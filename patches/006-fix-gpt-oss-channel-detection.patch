@@ -1,0 +1,32 @@
+From 166edd5b1e09bbf6fdea4dfb299d2154fb6438b8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=E6=9D=A8=E6=98=8E=E8=99=8E?= <tiggychan233@gmail.com>
+Date: Mon, 13 Apr 2026 15:28:21 +0800
+Subject: [PATCH] fix: GPT_OSS format detection uses correct opening tag
+ <|channel>
+
+The format detection was checking for <|channel|> but Gemma 4 outputs
+<|channel> (opening) and <channel|> (closing). This caused the parser
+to fall back to THINK_TAGS mode (looking for <think> tags), resulting
+in raw channel tokens leaking into streaming output.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+---
+ .../com/alibaba/mnnllm/android/chat/GenerateResultProcessor.kt  | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/apps/Android/MnnLlmChat/app/src/main/java/com/alibaba/mnnllm/android/chat/GenerateResultProcessor.kt b/apps/Android/MnnLlmChat/app/src/main/java/com/alibaba/mnnllm/android/chat/GenerateResultProcessor.kt
+index 2c0f81c..4486485 100644
+--- a/apps/Android/MnnLlmChat/app/src/main/java/com/alibaba/mnnllm/android/chat/GenerateResultProcessor.kt
++++ b/apps/Android/MnnLlmChat/app/src/main/java/com/alibaba/mnnllm/android/chat/GenerateResultProcessor.kt
+@@ -106,7 +106,7 @@ class GenerateResultProcessor {
+         // --- Format Detection ---
+         if (currentFormat == StreamFormat.UNKNOWN) {
+             // GPT_OSS tags are very specific and a strong indicator.
+-            if (rawStringBuilder.contains("<|message|>") || rawStringBuilder.contains("<|channel|>")) {
++            if (rawStringBuilder.contains("<|message|>") || rawStringBuilder.contains("<|channel>")) {
+                 currentFormat = StreamFormat.GPT_OSS
+                 Log.d(TAG, "Format detected: GPT_OSS. Reprocessing entire buffer.")
+                 // Since we've detected the format, we must re-process the entire buffered content
+-- 
+2.34.1
+
