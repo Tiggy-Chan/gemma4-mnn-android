@@ -11,7 +11,7 @@ import com.tiggy.gemma4mnn.parser.ChannelCallback
 import com.tiggy.gemma4mnn.parser.ChunkType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asStateFlowF
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -72,11 +72,47 @@ class ChatViewModel(
     fun sendMessage(text: String) {
         if (text.isBlank() || _isGenerating.value) return
 
-        val userMsg = ChatMessage.User(content = text)
+        if (text.startsWith("/search ")) {
+            val query = text.removePrefix("/search ").trim()
+            _isGenerating.value = true // Lock the UI while searching
+            
+            viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                try {
+                    val client = okhttp3.OkHttpClient()
+                    val request = okhttp3.Request.Builder()
+                        .url("https://html.duckduckgo.com/html/?q=$query")
+                        .build()
+                        
+                    val response = client.newCall(request).execute()
+                    val htmlData = response.body?.string() ?: ""
+                    
+                    // Clean HTML tags and limit size
+                    val cleanText = htmlData.replace(Regex("<[^>]*>"), " ").replace(Regex("\\s+"), " ").take(1500)
+                    val injectedText = "Here is real-time web data: $cleanText \n\nBased on that, answer this: $query"
+                    
+                    // Switch back to Main thread to send to Gemma
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        _isGenerating.value = false
+                        executeSend(injectedText)
+                    }
+                } catch (e: Exception) {
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        _isGenerating.value = false
+                        executeSend("Error searching the web: ${e.message}\n\nOriginal prompt: $text") 
+                    }
+                }
+            }
+        } else {
+            // Normal message handling
+            executeSend(text)
+        }
+    }
+
+    private fun executeSend(finalText: String) {
+        val userMsg = ChatMessage.User(content = finalText)
         _messages.value = _messages.value + userMsg
         messageOrderCounter++
 
-        // Persist to database
         viewModelScope.launch {
             if (currentSessionId == 0L) {
                 val modelName = _selectedModel.value?.name ?: "unknown"
